@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <script src="js/three.min.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src="js/ThreeBSP.js"></script>
+    <script>
+        var scene;
+        //创建场景
+        function initScene(){
+            scene = new THREE.Scene();
+        }
+
+        //更新控制器状态
+        function updateControls() {
+            controls.update();      
+        }
+
+  
+        var ScreenWidth = window.innerWidth;
+        var ScreenHeight = window.innerHeight; 
+        var camera;
+        function initCamera(){
+            var View_Angle = 75,
+                Aspect = ScreenWidth/ScreenHeight,
+                Near = 1,
+                Far = 20000;
+            camera = new THREE.PerspectiveCamera( View_Angle,Aspect, Near, Far);
+            camera.position.z = 40;
+            camera.position.y = 40;
+            camera.position.x = 20;
+            camera.lookAt({x:0,y:0,z:0});
+            controls = new THREE.OrbitControls( camera );
+            controls.addEventListener( 'change', updateControls );
+        }
+
+        var renderer;
+        function initRender(){
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild( renderer.domElement );
+            renderer.setClearColor(0xFFFFFF, 1.0);
+        }
+        var light;
+        function initLight() {
+            // 第二个参数是光源强度
+            light = new THREE.DirectionalLight(0xFF0000,1);
+             // 位置不同，方向光作用于物体的面也不同，看到的物体各个面的颜色也不一样
+            light.position.set(1,1,1);
+            scene.add(light);
+        }
+
+        function initObject(){
+
+                 // 坐标轴
+            var axis = new THREE.AxisHelper(20);
+            // 在场景中添加坐标轴
+            scene.add(axis);
+            // 地面
+            var floor  = new THREE.BoxGeometry( 70, 100, 20);
+            var texture = THREE.ImageUtils.loadTexture("images/floor.jpg",null,function(t)
+            {
+            });
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(10, 10);
+            var material = new THREE.MeshBasicMaterial({map:texture,transparent: true,opacity:1});
+            var floorCube = new THREE.Mesh( floor, material );
+
+            scene.add( floorCube );
+            floorCube.position.set(0,10,10)
+            floorCube.rotation.x += 0.5*Math.PI;
+
+            // var border = new THREE.BoxHelper(floorCube,0x0dcbb4);   //设置边框，不会旋转
+            // scene.add(border);
+
+              var edges = new THREE.EdgesHelper(floorCube,0x1535f7);  //设置边框，可以旋转
+            scene.add(edges);
+
+
+                 // 墙面
+            var cubeGeometry = new THREE.BoxGeometry(1, 10, 60);
+
+            /************各个面设置不同的纹理*********/
+            var matArray = [];
+            //matArray.push(new THREE.MeshBasicMaterial({color: 0x9cb2d1}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0x9cb2d1}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0xafc0ca}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0xd6e4ec}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0x9cb2d1}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0x9cb2d1}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0x9cb2d1}));
+            var faceMaterial = new THREE.MeshFaceMaterial(matArray);
+
+            var matArray = [];
+            matArray.push(new THREE.MeshBasicMaterial({color: 0xafc0ca}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0x9cb2d1}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0xd6e4ec}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0x9cb2d1}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0x9cd2d1}));
+            matArray.push(new THREE.MeshBasicMaterial({color: 0x9cb2c1}));
+            var faceMaterial1 = new THREE.MeshFaceMaterial(matArray);
+
+            // 合成立方体
+            var cube = new THREE.Mesh( cubeGeometry, faceMaterial1 );
+            // 设置墙面位置
+            cube.position.x = -15;
+            cube.position.y = 5;
+            cube.position.z = 0;
+            // 在场景中添加墙面
+            scene.add(cube);
+
+              // 墙面1
+            var cubeGeometry = new THREE.BoxGeometry(1, 10, 30);
+            // 合成立方体
+            var cube = new THREE.Mesh( cubeGeometry, faceMaterial1 );
+            // 设置墙面位置
+            cube.position.x = 0;
+            cube.position.y = 5;
+            cube.position.z = 30;
+            cube.rotation.y += 0.5*Math.PI;
+            // 在场景中添加墙面
+            scene.add(cube);
+               // 墙面2
+            var cubeGeometry = new THREE.BoxGeometry(1, 10, 60);
+            // 合成立方体
+            var cube = new THREE.Mesh( cubeGeometry, faceMaterial );
+            // 设置墙面位置
+            cube.position.x = 15;
+            cube.position.y = 5;
+            cube.position.z = 0;
+            // 在场景中添加墙面
+            scene.add(cube);
+
+            // 墙面3
+            var cubeGeometry = new THREE.BoxGeometry(1, 10, 30);
+
+            // var cumaterial = new THREE.MeshBasicMaterial({})
+            // 合成立方体
+            var cube = new THREE.Mesh( cubeGeometry,faceMaterial );
+
+            // var cube = new THREE.Mesh( cubeGeometry );            // 设置墙面位置
+            cube.position.x = 0;
+            cube.position.y = 5;
+            cube.position.z = -30;
+            cube.rotation.y += 0.5*Math.PI;
+            // 在场景中添加墙面
+           // scene.add(cube);
+
+             var doorgeo = new THREE.BoxGeometry(1, 8, 9);
+             var door = new THREE.Mesh(doorgeo,faceMaterial );
+                door.position.x = 0;
+                door.position.y = 5;
+                door.position.z = -30;
+                door.rotation.y += 0.5*Math.PI;
+
+            var sphere1BSP = new ThreeBSP(cube);
+            var cube2BSP = new ThreeBSP(door);
+
+            resultBSP = sphere1BSP.subtract(cube2BSP);
+            result = resultBSP.toMesh();
+            result.material.shading = THREE.FlatShading;
+            result.geometry.computeFaceNormals();
+            result.geometry.computeVertexNormals();
+            result.material.needsUpdate = true;
+            result.geometry.buffersNeedUpdate = true;
+            result.geometry.uvsNeedUpdate = true;
+            scene.add(result);
+
+            //添加两个点
+               var dotgeometry =  new THREE.Geometry();
+                dotgeometry.vertices.push(new THREE.Vector3(50,40,0));
+                 dotgeometry.vertices.push( new THREE.Vector3( 60, 0, 0 ) );
+
+                var dotmaterial = new THREE.PointsMaterial({
+                    sizeAttenuation:false,    //是否衰减
+                    size: 10,
+                    color: 0xff0000,
+                    opacity: 1
+                }); 
+                var dot = new THREE.Points(dotgeometry,dotmaterial);
+                 scene.add(dot)
+
+
+
+            var l = new THREE.Line( drawShape().createPointsGeometry(10), new THREE.LineBasicMaterial({color:0xff3333, linewidth:2}));
+            scene.add(l);
+
+
+
+        }
+     
+              function drawShape(){
+            var shape = new THREE.Shape();
+            shape.moveTo(50, 20);
+            shape.lineTo(20, 40);
+            shape.lineTo(40, 40);
+            shape.lineTo(50, 20);
+            return shape;
+        }
+        function render() {
+            requestAnimationFrame( render );
+            renderer.render( scene, camera );
+        }
+        function onWindowResize(){
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+}
+        init();
+        render();
+        function init(){
+            initRender();
+            initScene();
+            initCamera();
+            initLight();
+            initObject();
+            window.addEventListener( 'resize', onWindowResize, false );
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body {
+         margin: 0;
+          }
+          #action{
+            position: absolute;
+            bottom: 100px;
+            left: 50px;
+            z-index: 999;
+
+          }
+    </style>
+</head>
+<body ondblclick="launchFullScreen(document.documentElement)">
+
+<button id="action">Action</button>
+    <script src="js/three.js"></script>
+    <script  src="js/TrackballControls.js"></script>
+    <script src="js/ThreeBSP.js"></script>
+
+    <script  src="js/routine.js"></script>
+    <script>
+    var extrude;
+       function initObject(){
+
+           //定义一个三角形
+			var triangleShape = new THREE.Shape();
+			triangleShape.moveTo(  50, 50 );
+			triangleShape.lineTo(  -50, 50 );
+			triangleShape.lineTo( -50, -50 );
+            triangleShape.lineTo(  50, -50 );
+			triangleShape.lineTo(  50, 50 );
+
+
+			//根据截面shape,拉伸几何体：
+			var extrudeParameters = {
+			    amount: 10,   //拉伸线段的厚度
+			    steps: 10,    //步数。曲线拉伸的细分线段数。默认为1
+			    bevelEnabled: false,  //是否启用倒角
+			    bevelSegments: 10,  //倒角部分的细分线段数
+			    bevelSize: 10,       //从截面外轮廓倒角的尺寸
+			    bevelThickness: 10   //倒角的厚度
+			    //extrudePath:   拉伸几何体跟随的路径。3d的spline对象
+			    //extrudePts:   拉伸几何体是否跟随路径
+			    //frames:    包含三角形，法线，副法线数组
+			    //material:  正面和背面的材质属性
+			    //extrudeMaterial:  拉伸几何体和斜面的材质属性
+			    //uvGenerator:   UV坐标生成函数
+			};
+			extrude = new THREE.Mesh(new THREE.ExtrudeGeometry(triangleShape, extrudeParameters), new THREE.MeshLambertMaterial({ 
+                color: getRandColor() ,
+                side: THREE.DoubleSide
+                // polygonOffset: true,
+                // polygonOffsetUnits:    1   ,
+                // polygonOffsetFactor:   20 
+                   
+                // needsUpdate: false
+                // reflectivity : 1
+                // skinning : true
+                // polygonOffset: true,
+                // polygonOffsetFactor: -50
+                // overdraw: 0
+                // needUpdate:true
+                // depthTest : false 
+                // alphaTest: 1
+            }));
+                  
+                
+                
+                // needsUpdate: false
+                
+                // reflectivity : 1,
+                // skinning : true
+                
+                
+                // polygonOffset: true,
+                // polygonOffsetFactor: -60
+                
+                // overdraw: 0
+                
+                // needUpdate:true
+                
+                // depthTest : false
+                // alphaTest: 0.5
+            // }));
+              var edges = new THREE.EdgesHelper(extrude,0x1535f7);  //设置边框，可以旋转
+            scene.add(edges);
+
+			extrude.castShadow = extrude.receiveShadow = true;
+			scene.add(extrude);
+        }
+
+      var colors = [
+            0xFF62B0,
+            0x9A03FE,
+            0x62D0FF,
+            0x48FB0D,
+            0xDFA800,
+            0xC27E3A,
+            0x990099,
+            0x9669FE,
+            0x23819C,
+            0x01F33E,
+            0xB6BA18,
+            0xFF800D,
+            0xB96F6F,
+            0x4A9586        
+        ];
+        function getRandColor () {
+                 return colors[Math.floor(Math.random() * colors.length)];
+        }
+        var scene;
+        function initScene(){
+            scene = new THREE.Scene();
+        }
+
+        var camera;
+        function initCamera(){
+            camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 10, 1000);
+          	camera.position.set(0,-300,300)
+            camera.lookAt({x:0,y:0,z:0});
+        }
+
+        var renderer;
+        function initRender(){
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild( renderer.domElement );
+            renderer.setClearColor(0xFFFFFF, 1.0);
+        }
+        var light;
+            function initLight() {
+            // 添加平行光
+            light = new THREE.DirectionalLight(0xFFFFFF,1);
+            // 位置不同，方向光作用于物体的面也不同，看到的物体各个面的颜色也不一样
+            light.position.set(100,-100,100);
+            scene.add(light);
+        }
+        function initAsist(){
+                
+        	 // 坐标轴
+            var axis = new THREE.AxisHelper(100);
+            // 在场景中添加坐标轴,红色为x，绿色为y，蓝色为z
+            scene.add(axis);
+
+            //添加场地
+            var groundGeometry = new THREE.PlaneGeometry(1500,1500,1,1);
+            ground = new THREE.Mesh(groundGeometry,new THREE.MeshLambertMaterial({
+            	color: getRandColor(),
+                side: THREE.DoubleSide
+            }));
+            ground.position.set(0,0,-80);
+            ground.receiveShadow = true;
+            scene.add(ground);
+        }
+
+     
+
+        //准备控制器
+        var controls;
+       function initControls(){
+          controls = new THREE.TrackballControls(camera, renderer.domElement);
+
+        // controls = new THREE.OrbitControls( camera,renderer.domElement ); 
+        // controls.target = new THREE.Vector3(0,0,0);
+         // controls.addEventListener( 'change', updateControls);
+       }
+            //更新控制器状态，(orbitControls)
+        // function updateControls() {
+        //     controls.update();     
+        // }
+
+
+            function onWindowResize(){
+
+		    camera.aspect = window.innerWidth / window.innerHeight;
+		    camera.updateProjectionMatrix();
+		    renderer.setSize( window.innerWidth, window.innerHeight );
+
+		}
+         function launchFullScreen(element) { 
+                if(element.requestFullscreen) { 
+                element.requestFullscreen(); 
+                } else if(element.mozRequestFullScreen) { 
+                element.mozRequestFullScreen(); 
+                } else if(element.webkitRequestFullscreen) { 
+                element.webkitRequestFullscreen(); 
+                } else if(element.msRequestFullscreen) { 
+                element.msRequestFullscreen(); 
+                } 
+                } 
+
+        function init(){
+            initRender();
+            initScene();
+            initCamera();
+            initControls();
+            initLight();
+            initAsist();
+            initObject();
+
+
+            var action = document.getElementById("action");
+            action.onclick = function(){
+                extrude.translateX(10)
+            }
+
+
+
+
+
+        }
+                function render() {
+            renderer.render( scene, camera );
+            requestAnimationFrame( render );
+            controls.update();
+        }
+
+		init();
+   
+        render();
+  
+        if(window.addEventListener)
+            window.addEventListener('resize',onWindowResize,false);
+        else if(window.attachEvent)
+            window.attachEvent('resize',onWindowResize);
+        else window.resize = onWindowResize;
+        //resize,onload都可以这样写。
+    </script>
+</body>
+</html>

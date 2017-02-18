@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+
+</head>
+<body>
+
+	<script src="js/jquery-1.8.3.min.js"></script>
+	<script  src="js/three.min.js"></script>
+	<script  src="js/Detector.js"></script>
+	<script  src="js/TrackballControls.js"></script>
+	<script  src="js/routine.js"></script>
+	<script type="text/javascript">
+		if (!Detector.webgl) {
+        var msg = Detector.getWebGLErrorMessage();
+        document.getElementById('threejs-output').appendChild(msg);
+    }
+
+    var width =  window.innerWidth; 
+     var height = window.innerHeight;
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    camera.position.set(5, 5, 5);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+    var renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(width, height);
+    renderer.setClearColor(0x000000, 1);
+    document.body.appendChild(renderer.domElement);
+
+    var controls = new THREE.TrackballControls(camera, renderer.domElement);
+
+    function initGeo (xsize, zsize) {
+        var xmax = xsize / 2,
+            xmin = -xmax,
+            zmax = zsize / 2,
+            zmin = -zmax;
+        var geo = new THREE.Geometry();
+
+        geo.vertices.push(
+            new THREE.Vector3(xmin, 0, zmin),
+            new THREE.Vector3(xmax, 0, zmin),
+            new THREE.Vector3(xmax, 0, zmax),
+            new THREE.Vector3(xmin, 0, zmax)
+        );
+
+        geo.faces.push(
+            new THREE.Face3(0, 1, 3),
+            new THREE.Face3(2, 3, 1)
+        );
+
+        geo._edges = {
+            '0:1': new THREE.Vector2(0, 1),
+            '1:3': new THREE.Vector2(1, 3),
+            '0:3': new THREE.Vector2(0, 3),
+            '2:3': new THREE.Vector2(2, 3),
+            '1:2': new THREE.Vector2(1, 2)
+        };
+
+        geo._face2edges = [
+            ['0:1', '1:3', '0:3'],
+            ['2:3', '1:3', '1:2']
+        ];
+
+        return geo;
+    }
+
+    function subdivide (geo) {
+        var edgeVertices = {};
+        var e, v1, v2, vm;
+
+        for (var i in geo._edges) {
+            e = geo._edges[i];
+            v1 = geo.vertices[e.x];
+            v2 = geo.vertices[e.y];
+            vm = v1.clone();
+            vm.add(v2).multiplyScalar(0.5);
+            edgeVertices[i] = geo.vertices.length;
+            geo.vertices.push(vm);
+        }
+
+        var face, faceEdges,
+            newFaces = [],
+            newFace2Edge = [],
+            newEdges = {},
+            subFace, newFacesData;
+
+        function addEdge(a, b, newEdges) {
+            var v1 = Math.min(a, b),
+                v2 = Math.max(a, b),
+                key = v1 + ':' + v2;
+
+            newEdges[key] = new THREE.Vector2(v1, v2);
+            return key;
+        }
+
+        for (i = 0; i < geo._face2edges.length; i++) {
+            face = geo.faces[i];
+            faceEdges = geo._face2edges[i];
+
+            newFacesData = [
+                [
+                    face.a,
+                    edgeVertices[faceEdges[0]],
+                    edgeVertices[faceEdges[2]]
+                ],
+                [
+                    face.b,
+                    edgeVertices[faceEdges[1]],
+                    edgeVertices[faceEdges[0]]
+                ],
+                [
+                    face.c,
+                    edgeVertices[faceEdges[2]],
+                    edgeVertices[faceEdges[1]]
+                ],
+                [
+                    edgeVertices[faceEdges[0]],
+                    edgeVertices[faceEdges[1]],
+                    edgeVertices[faceEdges[2]]
+                ]
+            ];
+
+            for (var j = 0; j < newFacesData.length; j++) {
+                subFace = new THREE.Face3(
+                    newFacesData[j][0],
+                    newFacesData[j][1],
+                    newFacesData[j][2]
+                );
+                newFaces.push(subFace);
+                newFace2Edge.push([
+                    addEdge(subFace.a, subFace.b, newEdges),
+                    addEdge(subFace.b, subFace.c, newEdges),
+                    addEdge(subFace.a, subFace.c, newEdges)
+                ]);
+            }
+        }
+
+        geo.faces = newFaces;
+        geo._edges = newEdges;
+        geo._face2edges = newFace2Edge;
+
+        return geo;
+    }
+
+    function drawFaces (scene, xsize, zsize, subTimes) {
+        var geo = initGeo(xsize, zsize);
+
+        for (var t = 0; t < subTimes; t++) {
+            subdivide(geo);
+        }
+
+        geo._colors = [];
+        for (var v = 0; v < geo.vertices.length; v++) {
+            geo.vertices[v].y = Math.random() * 4 - 2;
+            var colorScale = (geo.vertices[v].y + 2) / 4;
+            geo._colors.push(new THREE.Color(colorScale, colorScale, colorScale));
+        }
+        for (var f = 0; f < geo.faces.length; f++) {
+            geo.faces[f].vertexColors = [
+                geo._colors[geo.faces[f].a],
+                geo._colors[geo.faces[f].b],
+                geo._colors[geo.faces[f].c]
+            ]
+        }
+
+        var mat = new THREE.MeshBasicMaterial({
+            //color: 0x0000ff,
+            //wireframe: true,
+            vertexColors: THREE.VertexColors
+        });
+        mat.side = THREE.DoubleSide;
+
+        var mesh = new THREE.Mesh(geo, mat);
+
+        scene.add(mesh);
+    }
+
+    function render() {
+        requestAnimationFrame(render);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    drawCoords(scene);
+    drawFaces(scene, 64, 64, 5);
+    render();
+
+	</script>
+</body>
+</html>

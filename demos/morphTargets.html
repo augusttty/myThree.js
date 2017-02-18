@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <script src="js/three.min.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src="js/ThreeBSP.js"></script>
+    <script>
+        var scene;
+        //创建场景
+        function initScene(){
+            scene = new THREE.Scene();
+        }
+
+        //更新控制器状态
+        function updateControls() {
+            controls.update();      
+        }
+
+  
+        var ScreenWidth = window.innerWidth;
+        var ScreenHeight = window.innerHeight; 
+        var camera;
+        function initCamera(){
+            var View_Angle = 75,
+                Aspect = ScreenWidth/ScreenHeight,
+                Near = 1,
+                Far = 20000;
+            camera = new THREE.PerspectiveCamera( View_Angle,Aspect, Near, Far);
+            camera.position.z = 200;
+            camera.position.y = 400;
+            camera.position.x = 200;
+            camera.lookAt({x:0,y:0,z:0});
+            controls = new THREE.OrbitControls( camera );
+            controls.addEventListener( 'change', updateControls );
+        }
+
+        var renderer;
+        function initRender(){
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild( renderer.domElement );
+            renderer.setClearColor(0xFFFFFF, 1.0);
+        }
+        var light;
+        function initLight() {
+            light = new THREE.DirectionalLight(0xFF0000,1);
+            light.position.set(1,1,1);
+            scene.add(light);
+        }
+
+        function initObject(){
+           var geometry = new  THREE.BoxGeometry(200,200,200);
+
+           // var texture = THREE.ImageUtils.loadTexture('images/timg.jpg',null,function(t){});
+           // texture.anisotropy = renderer.getMaxAnisotropy();
+           // texture.anisotropy = 0;
+
+            // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            // texture.repeat.set(10, 10);
+           var material = new  THREE.MeshBasicMaterial({
+            // map: texture
+            color: 0xff0000,
+            morphTargets: true
+           });
+           var vertices = []; console.log(geometry.vertices)
+           for(var i = 0;i< geometry.vertices.length;i++)
+           {
+            var f = 2 ;
+            vertices.push(geometry.vertices[i].clone());
+            vertices[i].x *= f;
+            vertices[i].y *= f;
+            // vertices[i].z *= f;
+           }
+
+           geometry.morphTargets.push({name: 'target0',vertices:vertices});  //morphTargets:变形顶点数组。每一个变形顶点都是一个js对象。
+
+           mesh = new THREE.Mesh(geometry,material);
+           scene.add(mesh);
+        }
+     var s = 0;
+        function render() {
+
+            s+= 0.03;
+            mesh.morphTargetInfluences[0] = Math.abs(Math.sin(s));  //调整morphTargetInfluecnces
+            requestAnimationFrame( render );
+            renderer.render( scene, camera );
+        }
+        init();
+        render();
+        function init(){
+            initRender();
+            initScene();
+            initCamera();
+            initLight();
+            initObject();
+            // console.log(renderer,camera)时
+            // THREEx.WindoResize(renderer,camera);
+        }
+    </script>
+</body>
+</html>
