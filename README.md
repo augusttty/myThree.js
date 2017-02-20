@@ -8,8 +8,7 @@
 obj/mtl to js tools:
 1.安装python-2.6msi   
 2.下载convert_obj_three.py   ,obj转js脚本
-3.安装好python后，保证转换脚本和model.obj(重命名成这个)都在D:\ ,打开命令行
-输入
+3.安装好python后
  当前路径   python convertor.py -i  model.obj -o  output.js -d invert
 绝对路径   C:\Python26\python d:\convert_obj_three.py -i d:\model.obj -o d:\model.js -d invert
 4.如果有mtl文件，会有提示找不到**.mtl，只需要按照提示重命名即可。
