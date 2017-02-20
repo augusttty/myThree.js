@@ -29,7 +29,7 @@
        function initObject(){
 
             var jsonLoader = new THREE.JSONLoader();
-            jsonLoader.load( "models/model.js", addModelToScene );
+            jsonLoader.load( "models/futi.js", addModelToScene );
             function addModelToScene( geometry, materials ) 
             {
                // geometry = new THREE.CubeGeometry(100,100,100);
@@ -37,10 +37,28 @@
                 //var material = new THREE.MeshBasicMaterial({ map: texture });
 
             // var material = new THREE.MeshFaceMaterial( materials/*{ color: 'red', wireframe: true } */);
+             for(var i=0; i<geometry.vertices.length; i++){  
+                var vertices = [];  
+                for(var j=0; j<geometry.vertices.length; j++){  
+                    vertices.push(geometry.vertices[j].clone());  
+                    if(j == i){  
+                        vertices[vertices.length-1].x *= 2;  
+                        vertices[vertices.length-1].y *= 2;  
+                        vertices[vertices.length-1].z *= 3;  
+                    }  
+                }  
+                geometry.morphTargets.push({name:"target"+i,vertices:vertices});  
+            }  
+
             var texture  = new THREE.ImageUtils.loadTexture('images/floor.jpg');
             var material = new THREE.MeshFaceMaterial(materials);
 
             android = new THREE.Mesh( geometry, material );
+            android.morphTargetInfluences[0] = 0.2;
+            android.morphTargetInfluences[1] = 0.4;
+            android.morphTargetInfluences[2] = 0.6;
+            android.morphTargetInfluences[3] = 0.1;
+            android.morphTargetInfluences[4] = 5;
             android.scale.set(1,2,1);
             android.position.set(0,60,0);
             scene.add( android );
