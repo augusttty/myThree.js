@@ -69,25 +69,6 @@
                 // depthTest : false 
                 // alphaTest: 1
             }));
-                  
-                
-                
-                // needsUpdate: false
-                
-                // reflectivity : 1,
-                // skinning : true
-                
-                
-                // polygonOffset: true,
-                // polygonOffsetFactor: -60
-                
-                // overdraw: 0
-                
-                // needUpdate:true
-                
-                // depthTest : false
-                // alphaTest: 0.5
-            // }));
               var edges = new THREE.EdgesHelper(extrude,0x1535f7);  //设置边框，可以旋转
             scene.add(edges);
 
@@ -120,8 +101,14 @@
         }
 
         var camera;
+        var screenWidth = window.innerWidth;
+        var screenHeight = window.innerHeight;
         function initCamera(){
-            camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 10, 1000);
+        	var view_Angle = 75,
+        		Aspect =  screenWidth/screenHeight,
+        		Near = 1,
+        		Far = 20000;
+            camera = new THREE.PerspectiveCamera( view_Angle,Aspect, Near, Far);
           	camera.position.set(0,-300,300)
             camera.lookAt({x:0,y:0,z:0});
         }
@@ -133,13 +120,23 @@
             document.body.appendChild( renderer.domElement );
             renderer.setClearColor(0xFFFFFF, 1.0);
         }
-        var light;
+
             function initLight() {
-            // 添加平行光
-            light = new THREE.DirectionalLight(0xFFFFFF,1);
-            // 位置不同，方向光作用于物体的面也不同，看到的物体各个面的颜色也不一样
-            light.position.set(100,-100,100);
-            scene.add(light);
+            	var ambientLight = new THREE.AmbientLight( getRandColor() );
+                // //把环境光加到场景中
+                scene.add( ambientLight );
+                // //再新建一个无线远的平行光，就是像太阳光一样的，
+                var directionalLight = new THREE.DirectionalLight(  getRandColor() );
+                // //把平行光放在y轴正方向上的无穷远处
+                directionalLight.position.set( 0, 1, 0 );
+                // //把平行光加到场景中
+                scene.add( directionalLight );
+                // //再建一个点光源 颜色 强度 照射距离
+                var pointLight = new THREE.PointLight( 0xff0000, 1, 500 );
+                // //设置点光源的位置
+                pointLight.position.set(0,0,-200);
+                // //把点光源加入到场景中
+                scene.add( pointLight );
         }
         function initAsist(){
                 
@@ -164,10 +161,26 @@
         //准备控制器
         var controls;
        function initControls(){
-          controls = new THREE.TrackballControls(camera, renderer.domElement);
+              //轨迹球控制 鼠标左击旋转  右击平移 滚轮远近
+                controls = new THREE.TrackballControls( camera, renderer.domElement );
+                //旋转速度
+                controls.rotateSpeed = 1.0;
+                //变焦速度
+                controls.zoomSpeed = 1.2;
+                //平移速度
+                controls.panSpeed = 0.8;
+                //是否不变焦
+                controls.noZoom = false;
+                //是否不平移
+                controls.noPan = true;
+                //可能是惯性 true没有惯性
+                controls.staticMoving = false;
+                //动态阻尼系数 就是灵敏度             
+                controls.dynamicDampingFactor = 0.3;
+                //controls.enabled = false;不能改变视角
 
-        // controls = new THREE.OrbitControls( camera,renderer.domElement ); 
-        // controls.target = new THREE.Vector3(0,0,0);
+       	 // controls = new THREE.OrbitControls( camera,renderer.domElement ); 
+       	 // controls.target = new THREE.Vector3(0,0,0);
          // controls.addEventListener( 'change', updateControls);
        }
             //更新控制器状态，(orbitControls)
@@ -175,14 +188,17 @@
         //     controls.update();     
         // }
 
-
+        	//窗口改变大小时
             function onWindowResize(){
-
+            	//改变相机的aspect属性为当前窗口的宽高
 		    camera.aspect = window.innerWidth / window.innerHeight;
+		    //更新相机的投影矩阵
 		    camera.updateProjectionMatrix();
+		    //重新设置场景宽高
 		    renderer.setSize( window.innerWidth, window.innerHeight );
 
 		}
+
          function launchFullScreen(element) { 
                 if(element.requestFullscreen) { 
                 element.requestFullscreen(); 

@@ -13,6 +13,41 @@
     <script src="js/controls/OrbitControls.js"></script>
     <script src="js/ThreeBSP.js"></script>
     <script>
+      function initObject(){
+           var geometry = new  THREE.BoxGeometry(200,200,200);
+
+           var texture = THREE.ImageUtils.loadTexture('images/timg.jpg',null,function(t){});
+           // texture.anisotropy = renderer.getMaxAnisotropy();
+           // texture.anisotropy = 0;
+
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1, 1);
+           var material = new  THREE.MeshBasicMaterial({
+            map: texture,
+            // color: 0xff0000,
+            morphTargets: true
+            // wireframe: true
+           });
+           var vertices = []; console.log(geometry.vertices)
+           for(var i = 0;i< geometry.vertices.length;i++)
+           {
+            var f = 5 ;
+            vertices.push(geometry.vertices[i].clone());
+            vertices[i].x *= f;
+            vertices[i].y *= f;
+            // vertices[i].z *= f;
+           }
+
+           geometry.morphTargets.push(
+           {
+           name: 'target0',vertices:vertices
+           }
+           );  //morphTargets:变形顶点数组。每一个变形顶点都是一个js对象。
+
+           mesh = new THREE.Mesh(geometry,material);
+
+           scene.add(mesh);
+        }
         var scene;
         //创建场景
         function initScene(){
@@ -52,43 +87,14 @@
         var light;
         function initLight() {
             light = new THREE.DirectionalLight(0xFF0000,1);
-            light.position.set(1,1,1);
+            light.position.set(100,-100,100);
             scene.add(light);
         }
 
-        function initObject(){
-           var geometry = new  THREE.BoxGeometry(200,200,200);
-
-           // var texture = THREE.ImageUtils.loadTexture('images/timg.jpg',null,function(t){});
-           // texture.anisotropy = renderer.getMaxAnisotropy();
-           // texture.anisotropy = 0;
-
-            // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            // texture.repeat.set(10, 10);
-           var material = new  THREE.MeshBasicMaterial({
-            // map: texture
-            color: 0xff0000,
-            morphTargets: true
-           });
-           var vertices = []; console.log(geometry.vertices)
-           for(var i = 0;i< geometry.vertices.length;i++)
-           {
-            var f = 2 ;
-            vertices.push(geometry.vertices[i].clone());
-            vertices[i].x *= f;
-            vertices[i].y *= f;
-            // vertices[i].z *= f;
-           }
-
-           geometry.morphTargets.push({name: 'target0',vertices:vertices});  //morphTargets:变形顶点数组。每一个变形顶点都是一个js对象。
-
-           mesh = new THREE.Mesh(geometry,material);
-           scene.add(mesh);
-        }
+      
      var s = 0;
         function render() {
-
-            s+= 0.03;
+            s+= 0.001;
             mesh.morphTargetInfluences[0] = Math.abs(Math.sin(s));  //调整morphTargetInfluecnces
             requestAnimationFrame( render );
             renderer.render( scene, camera );

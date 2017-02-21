@@ -7,7 +7,7 @@
         <style>
             body {
                 font-family: Monospace;
-                background-color: #f0f0f0;
+                background-color: #ffffff;
                 margin: 0px;
                 overflow: hidden;
             }
@@ -18,7 +18,6 @@
         <script src="js/jquery-1.8.3.min.js"></script>
         <script src="js/tween.min.js"></script>
         <script src="js/TrackballControls.js"></script>
-        <!-- <script src="script/renderers/CSS3DRenderer.js"></script> -->
         <script src="js/stats.js"></script>
             
             
@@ -44,7 +43,7 @@
                 //把上面的层放到body里
                 document.body.appendChild( container );
                 //创建一个透视相机 可视角度70度 浏览器的全屏的宽高 水平视锥 最近1 最远10000 
-                camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
+                camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 6000 );
                 //相机的位置z正半轴3000
                 camera.position.z = 3000;
                 //轨迹球控制 鼠标左击旋转  右击平移 滚轮远近
@@ -70,25 +69,25 @@
                     
                 //新建一个环境光 就是正常物体都能照到的光
                 var ambientLight = new THREE.AmbientLight( Math.random() *0xffffff );
-                //把环境光加到场景中
+                // //把环境光加到场景中
                 scene.add( ambientLight );
-                //再新建一个无线远的平行光，就是像太阳光一样的，
-                var directionalLight = new THREE.DirectionalLight( Math.random() * 0xffffff );
-                //把平行光放在y轴正方向上的无穷远处
+                // //再新建一个无线远的平行光，就是像太阳光一样的，
+                var directionalLight = new THREE.DirectionalLight(  Math.random()*0xffffff );
+                // //把平行光放在y轴正方向上的无穷远处
                 directionalLight.position.set( 0, 1, 0 );
-                //把平行光加到场景中
+                // //把平行光加到场景中
                 scene.add( directionalLight );
-                //再建一个点光源 颜色 强度 照射距离
+                // //再建一个点光源 颜色 强度 照射距离
                 var pointLight = new THREE.PointLight( 0xff0000, 1, 500 );
-                //设置点光源的位置
+                // //设置点光源的位置
                 pointLight.position.set(0,0,-200);
-                //把点光源加入到场景中
+                // //把点光源加入到场景中
                 scene.add( pointLight );
                 //定义一个球体
                 var geometry = new THREE.SphereGeometry( 70, 32, 16 );
     
                 for ( var i = 0; i < 50; i ++ ) {
-                    //把这个球体加上网格材质，随机生成一种颜色的网格对象
+                    //把这个球体加上材质
                     var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
                         
                     //把材质颜色放到对象的环境颜色上，还没有理解
@@ -107,7 +106,7 @@
     
                 }
                 //创建一个长2000宽2000，8*8的网格对象并加上一种基本材质
-                plane = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
+                plane = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.25, transparent: true, wireframe: true } ) );
                 //网格对象是否可见
                 plane.visible = true;
                 //把网格对象加到场景中
@@ -117,6 +116,7 @@
                 projector = new THREE.Projector();
                 //创建一个抗锯齿的webgl渲染器
                 renderer = new THREE.WebGLRenderer( { antialias: true } );
+                renderer.setClearColor(0xffffff,0.1)
                 //是否排列对象 默认是true
                 renderer.sortObjects = false;
                 //设置渲染的范围
@@ -214,7 +214,8 @@
                         //改变水平面的位置
                         plane.position.copy( INTERSECTED.position );
                         //并把水平面指向到相机的方向
-                        plane.lookAt( camera.position );
+                        plane.lookAt( camera.position )
+
     
                     }
                     //改变鼠标的样式
@@ -223,7 +224,7 @@
                 } else {
                     //改变鼠标的样式
                     container.style.cursor = 'auto';
-    
+
                 }
     
             }
@@ -250,11 +251,10 @@
                     //选中位置和水平面位置（物体中心）的偏移量
                     offset.copy( intersects[ 0 ].point ).sub( plane.position );
                     //改变鼠标的样式
-                    container.style.cursor = 'move';
-    
-                }
-    
-            }
+                    container.style.cursor = 'move';}  
+               
+                }  
+            
     
             function onDocumentMouseUp( event ) {
     
