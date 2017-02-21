@@ -13,75 +13,31 @@
     <script src="js/controls/OrbitControls.js"></script>
     <script src="js/ThreeBSP.js"></script>
     <script>
-        var scene;
-        //创建场景
-        function initScene(){
-            scene = new THREE.Scene();
-        }
 
-        //更新控制器状态
-        function updateControls() {
-            controls.update();      
-        }
-
-  
-        var ScreenWidth = window.innerWidth;
-        var ScreenHeight = window.innerHeight; 
-        var camera;
-        function initCamera(){
-            var View_Angle = 75,
-                Aspect = ScreenWidth/ScreenHeight,
-                Near = 1,
-                Far = 20000;
-            camera = new THREE.PerspectiveCamera( View_Angle,Aspect, Near, Far);
-            camera.position.z = 40;
-            camera.position.y = 40;
-            camera.position.x = 20;
-            camera.lookAt({x:0,y:0,z:0});
-            controls = new THREE.OrbitControls( camera );
-            controls.addEventListener( 'change', updateControls );
-        }
-
-        var renderer;
-        function initRender(){
-            renderer = new THREE.WebGLRenderer({antialias: true});
-            renderer.setSize( window.innerWidth, window.innerHeight );
-            document.body.appendChild( renderer.domElement );
-            renderer.setClearColor(0xFFFFFF, 1.0);
-        }
-        var light;
-        function initLight() {
-            // 第二个参数是光源强度
-            light = new THREE.DirectionalLight(0xFF0000,1);
-             // 位置不同，方向光作用于物体的面也不同，看到的物体各个面的颜色也不一样
-            light.position.set(1,1,1);
-            scene.add(light);
-        }
-
-        function initObject(){
+      function initObject(){
 
                  // 坐标轴
             var axis = new THREE.AxisHelper(20);
             // 在场景中添加坐标轴
             scene.add(axis);
             // 地面
-            var floor  = new THREE.BoxGeometry( 70, 100, 20);
+            var cubeGeo  = new THREE.BoxGeometry( 70, 100, 20);
             var texture = THREE.ImageUtils.loadTexture("images/floor.jpg",null,function(t)
             {
             });
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set(10, 10);
-            var material = new THREE.MeshBasicMaterial({map:texture,transparent: true,opacity:1});
-            var floorCube = new THREE.Mesh( floor, material );
+            var material = new THREE.MeshBasicMaterial({map:texture,transparent: true,opacity:0.9});
+            var cube = new THREE.Mesh( cubeGeo, material );
 
-            scene.add( floorCube );
-            floorCube.position.set(0,10,10)
-            floorCube.rotation.x += 0.5*Math.PI;
+            scene.add( cube );
+            cube.position.set(80,10,10)
+            cube.rotation.x += 0.5*Math.PI;
 
-            // var border = new THREE.BoxHelper(floorCube,0x0dcbb4);   //设置边框，不会旋转
+            // var border = new THREE.BoxHelper(floorCube,0x0dcbb4);   //设置边框，不会旋转?
             // scene.add(border);
 
-              var edges = new THREE.EdgesHelper(floorCube,0x1535f7);  //设置边框，可以旋转
+              var edges = new THREE.EdgesHelper(cube,0x1535f7);  //设置边框，可以旋转?
             scene.add(edges);
 
 
@@ -174,37 +130,54 @@
             result.geometry.uvsNeedUpdate = true;
             scene.add(result);
 
-            //添加两个点
-               var dotgeometry =  new THREE.Geometry();
-                dotgeometry.vertices.push(new THREE.Vector3(50,40,0));
-                 dotgeometry.vertices.push( new THREE.Vector3( 60, 0, 0 ) );
-
-                var dotmaterial = new THREE.PointsMaterial({
-                    sizeAttenuation:false,    //是否衰减
-                    size: 10,
-                    color: 0xff0000,
-                    opacity: 1
-                }); 
-                var dot = new THREE.Points(dotgeometry,dotmaterial);
-                 scene.add(dot)
-
-
-
-            var l = new THREE.Line( drawShape().createPointsGeometry(10), new THREE.LineBasicMaterial({color:0xff3333, linewidth:2}));
-            scene.add(l);
-
-
-
         }
+        var scene;
+        //创建场景
+        function initScene(){
+            scene = new THREE.Scene();
+        }
+
+        //更新控制器状态
+        function updateControls() {
+            controls.update();      
+        }
+
+  
+        var ScreenWidth = window.innerWidth;
+        var ScreenHeight = window.innerHeight; 
+        var camera;
+        function initCamera(){
+            var View_Angle = 75,
+                Aspect = ScreenWidth/ScreenHeight,
+                Near = 1,
+                Far = 20000;
+            camera = new THREE.PerspectiveCamera( View_Angle,Aspect, Near, Far);
+            camera.position.z = 40;
+            camera.position.y = 40;
+            camera.position.x = 20;
+            camera.lookAt({x:0,y:0,z:0});
+            controls = new THREE.OrbitControls( camera );
+            controls.addEventListener( 'change', updateControls );
+        }
+
+        var renderer;
+        function initRender(){
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild( renderer.domElement );
+            renderer.setClearColor(0xFFFFFF, 1.0);
+        }
+        var light;
+        function initLight() {
+            // 第二个参数是光源强度
+            light = new THREE.DirectionalLight(0xFF0000,1);
+             // 位置不同，方向光作用于物体的面也不同，看到的物体各个面的颜色也不一样
+            light.position.set(1,1,1);
+            scene.add(light);
+        }
+
+      
      
-              function drawShape(){
-            var shape = new THREE.Shape();
-            shape.moveTo(50, 20);
-            shape.lineTo(20, 40);
-            shape.lineTo(40, 40);
-            shape.lineTo(50, 20);
-            return shape;
-        }
         function render() {
             requestAnimationFrame( render );
             renderer.render( scene, camera );

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body {
+         margin: 0;
+          }
+          #action{
+            position: absolute;
+            bottom: 100px;
+            left: 50px;
+            z-index: 999;
+
+          }
+    </style>
+</head>
+<body ondblclick="launchFullScreen(document.documentElement)">
+
+<button id="action">Action</button>
+    <script src="js/three.js"></script>
+    <script  src="js/TrackballControls.js"></script>
+    <script src="js/ThreeBSP.js"></script>
+
+    <script  src="js/routine.js"></script>
+    <script>
+    //----------------------THREE.PointMaterial-----
+       function initObject(){
+
+                //添加两个点
+               var dotgeometry =  new THREE.Geometry();
+                dotgeometry.vertices.push(new THREE.Vector3(50,40,0));   //push两个点
+                dotgeometry.vertices.push( new THREE.Vector3( 60, 0, 0 ) );
+                var dotmaterial = new THREE.PointsMaterial({
+                    sizeAttenuation:false,    //是否衰减
+                    size: 10,
+                    color: 0xff0000,
+                    opacity: 1.0
+                }); 
+                var dot = new THREE.Points(dotgeometry,dotmaterial);
+                scene.add(dot)
+
+    //-------------------------------THREE.Shape-------------
+                 //画一个三角形(面或者线)
+                var lineMat  = new THREE.LineBasicMaterial({color:0xff3333, linewidth:2});  
+                var geo = getShape().createPointsGeometry();         //可以画线形状
+
+                // var geo =  getShape().makeGeometry();  //等价于new THREE.ShapeGeometry(getShape())  一般用来创建面，线形状可能不会闭合
+
+                var trangle = new THREE.Line( geo,lineMat);     //通过二维线对象创建，只是线
+                  // var trangle = new THREE.Mesh( geo,lineMat);   //通过mesh创建，则会出现三角面
+                scene.add(trangle); 
+
+             //---------shape.createPointsGeometry()可以创建线多边形
+            //----------shapeGeometry(shape)只适合用来创建自定义的平面多边形 
+            // ---------Path可以使用toShapes()转成shape，适合画平面 
+
+    //-----------------------THREE.Path-----------------------
+                var point1 = new THREE.Vector2(10,20)
+                var point2 = new THREE.Vector2(20,30)
+                var point3 = new THREE.Vector2(40,20)
+                var points = [point1,point2,point3]
+
+                var path = new THREE.Path(points);
+                path.autoClose = true;
+                var mat  = new THREE.LineBasicMaterial({color:0xff3333, linewidth:2});  
+                var trangle = new THREE.Mesh(new THREE.ShapeGeometry(path.toShapes()),mat);
+                scene.add(trangle)
+        }
+
+              function getShape(){
+            var shape = new THREE.Shape();
+            shape.moveTo(50, 20);   //起点
+            shape.lineTo(20, 40);
+            shape.lineTo(40, 40);
+            shape.lineTo(50, 20);    //闭环
+            return shape;
+        }
+
+      var colors = [
+            0xFF62B0,
+            0x9A03FE,
+            0x62D0FF,
+            0x48FB0D,
+            0xDFA800,
+            0xC27E3A,
+            0x990099,
+            0x9669FE,
+            0x23819C,
+            0x01F33E,
+            0xB6BA18,
+            0xFF800D,
+            0xB96F6F,
+            0x4A9586        
+        ];
+        function getRandColor () {
+                 return colors[Math.floor(Math.random() * colors.length)];
+        }
+        var scene;
+        function initScene(){
+            scene = new THREE.Scene();
+        }
+
+        var camera;
+        function initCamera(){
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 5000);
+          	camera.position.set(-600,-500,900)
+            camera.lookAt({x:0,y:0,z:0});
+        }
+
+        var renderer;
+        function initRender(){
+            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild( renderer.domElement );
+            renderer.setClearColor(0xFFFFFF, 1.0);
+        }
+        var light;
+            function initLight() {
+            // 添加平行光
+            light = new THREE.DirectionalLight(0xFFFFFF,1);
+            // 位置不同，方向光作用于物体的面也不同，看到的物体各个面的颜色也不一样
+            light.position.set(100,-100,100);
+            scene.add(light);
+        }
+        function initAsist(){
+                
+        	 // 坐标轴
+            var axis = new THREE.AxisHelper(100);
+            // 在场景中添加坐标轴,红色为x，绿色为y，蓝色为z
+            scene.add(axis);
+
+            //添加场地
+            var groundGeometry = new THREE.PlaneGeometry(1500,1500,1,1);
+            ground = new THREE.Mesh(groundGeometry,new THREE.MeshLambertMaterial({
+            	color: getRandColor(),
+                side: THREE.DoubleSide
+            }));
+            ground.position.set(0,0,-80);
+            ground.receiveShadow = true;
+            scene.add(ground);
+        }
+
+     
+
+        //准备控制器
+        var controls;
+       function initControls(){
+          controls = new THREE.TrackballControls(camera, renderer.domElement);
+
+        // controls = new THREE.OrbitControls( camera,renderer.domElement ); 
+        // controls.target = new THREE.Vector3(0,0,0);
+         // controls.addEventListener( 'change', updateControls);
+       }
+            //更新控制器状态，(orbitControls)
+        // function updateControls() {
+        //     controls.update();     
+        // }
+
+
+            function onWindowResize(){
+
+		    camera.aspect = window.innerWidth / window.innerHeight;
+		    camera.updateProjectionMatrix();
+		    renderer.setSize( window.innerWidth, window.innerHeight );
+
+		}
+         function launchFullScreen(element) { 
+                if(element.requestFullscreen) { 
+                element.requestFullscreen(); 
+                } else if(element.mozRequestFullScreen) { 
+                element.mozRequestFullScreen(); 
+                } else if(element.webkitRequestFullscreen) { 
+                element.webkitRequestFullscreen(); 
+                } else if(element.msRequestFullscreen) { 
+                element.msRequestFullscreen(); 
+                } 
+                } 
+
+        function init(){
+            initRender();
+            initScene();
+            initCamera();
+            initControls();
+            initLight();
+            initAsist();
+            initObject();
+
+
+            var action = document.getElementById("action");
+            action.onclick = function(){
+                
+
+
+            }
+
+
+
+
+
+        }
+                function render() {
+            renderer.render( scene, camera );
+            requestAnimationFrame( render );
+            controls.update();
+        }
+
+		init();
+   
+        render();
+  
+        if(window.addEventListener)
+            window.addEventListener('resize',onWindowResize,false);
+        else if(window.attachEvent)
+            window.attachEvent('resize',onWindowResize);
+        else window.resize = onWindowResize;
+        //resize,onload都可以这样写。
+    </script>
+</body>
+</html>

@@ -15,6 +15,41 @@
 
 		</style>
 		<script>
+
+          function initObject() {//?????????????????????????????
+                var geometry = new THREE.Geometry();
+                geometry.vertices.push( new THREE.Vector3( - 500, 0, 0 ) );
+                geometry.vertices.push( new THREE.Vector3( 500, 0, 0 ) );
+                console.log(geometry);
+                var buffer = new THREE.BufferGeometry;console.log(buffer);
+                buffer.addAttribute('vertices',new THREE.BufferAttribute(geometry.vertices,2));console.log(buffer)
+
+                for ( var i = 0; i <= 20; i ++ ) {
+
+                    var line = new THREE.Line( buffer, new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } ) );
+                    line.position.z = ( i * 50 ) - 500;
+                    scene.add( line );
+
+                    var line = new THREE.Line( buffer, new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } ) );
+                    line.position.x = ( i * 50 ) - 500;
+                    line.rotation.y = 90 * Math.PI / 180;   //旋转90度
+                    scene.add( line );
+
+                }
+    
+                // var geometry =  new THREE.Geometry();
+                // geometry.vertices.push(new THREE.Vector3(50,20,0));
+                //  geometry.vertices.push( new THREE.Vector3( 100, 0, 0 ) );
+
+                // var dotMaterial = new THREE.PointsMaterial({
+                //     sizeAttenuation:false,    //是否衰减
+                //     size: 10,
+                //     color: 0xff0000,
+                //     opacity: 1
+                // }); 
+                // var dot = new THREE.Points(geometry,dotMaterial);
+                //  scene.add(dot)
+            }
             var renderer;
             function initRenderer() {
                 width = document.getElementById('canvas-frame').clientWidth;
@@ -56,42 +91,7 @@
             }
 
             var cube;
-            function initObject() {//?????????????????????????????
-                // var geometry = new THREE.Geometry();
-                // geometry.vertices.push( new THREE.Vector3( - 500, 0, 0 ) );
-                // geometry.vertices.push( new THREE.Vector3( 500, 0, 0 ) );
-                // console.log(geometry);
-                // var buffer = new THREE.BufferGeometry;console.log(buffer);
-                // buffer.addAttribute('vertices',new THREE.BufferAttribute(geometry.vertices,2));console.log(buffer)
-
-
-
-                // for ( var i = 0; i <= 20; i ++ ) {
-
-                //     var line = new THREE.Line( buffer.attributes, new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } ) );
-                //     line.position.z = ( i * 50 ) - 500;
-                //     scene.add( line );
-
-                //     var line = new THREE.Line( buffer.attributes, new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } ) );
-                //     line.position.x = ( i * 50 ) - 500;
-                //     line.rotation.y = 90 * Math.PI / 180;   //旋转90度
-                //     scene.add( line );
-
-                // }
-    
-                var geometry =  new THREE.Geometry();
-                geometry.vertices.push(new THREE.Vector3(50,20,0));
-                 geometry.vertices.push( new THREE.Vector3( 100, 0, 0 ) );
-
-                var dotMaterial = new THREE.PointsMaterial({
-                    sizeAttenuation:false,    //是否衰减
-                    size: 10,
-                    color: 0xff0000,
-                    opacity: 1
-                }); 
-                var dot = new THREE.Points(geometry,dotMaterial);
-                 scene.add(dot)
-            }
+          
 
             function init() {
                 initRenderer();
